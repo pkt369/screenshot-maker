@@ -7,7 +7,7 @@ const MIN_SLIDES = 3;
 const MAX_SLIDES = 5;
 
 function createEmptySlide(): SlideConfig {
-  return { screenshot: null, headline: '' };
+  return { screenshot: null, headline: '', headlineFontSize: 128 };
 }
 
 export function ComposerPage() {
@@ -145,6 +145,14 @@ export function ComposerPage() {
                         value={slide.headline}
                         onChange={(e) => updateSlide(i, { headline: e.target.value })}
                         placeholder="Enter headline text"
+                      />
+                    </label>
+                    <label className="field" onClick={(e) => e.stopPropagation()}>
+                      <span>Font Size</span>
+                      <input
+                        type="number"
+                        value={slide.headlineFontSize}
+                        onChange={(e) => updateSlide(i, { headlineFontSize: Number(e.target.value) })}
                       />
                     </label>
                   </div>

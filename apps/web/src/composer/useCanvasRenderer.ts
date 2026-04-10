@@ -16,6 +16,7 @@ import { clipRoundedRect, getCoverSourceRect } from './rendering';
 export interface SlideConfig {
   screenshot: HTMLImageElement | null;
   headline: string;
+  headlineFontSize: number;
 }
 
 export interface SharedConfig {
@@ -98,12 +99,13 @@ function renderSlide(
   if (slide.headline) {
     const headlineY = getHeadlineY(mockupPos.y);
     ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 64px system-ui, -apple-system, sans-serif';
+    const fontSize = slide.headlineFontSize;
+    ctx.font = `bold ${fontSize}px system-ui, -apple-system, sans-serif`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
 
     const lines = slide.headline.split('\n');
-    const lineHeight = 80;
+    const lineHeight = Math.round(fontSize * 1.25);
     const totalHeight = (lines.length - 1) * lineHeight;
     const startY = headlineY - totalHeight / 2;
 
