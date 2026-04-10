@@ -10,14 +10,14 @@ const DYNAMIC_ORIGINAL_HEIGHT = 1686;
 // Frame layer currently shares the same bounding box as the dynamic overlay asset.
 const FRAME_ORIGINAL_WIDTH = 830;
 
-// Screen area coordinates within the FRAME image (818×1686)
-// Measured from iPhone16-frame.png — the screen region inside the frame body
+// Screen area coordinates within the FRAME image (830×1686)
+// Inset from frame edge to leave a uniform black bezel border visible
 const SCREEN_AREA = {
-  x: 14,
-  y: 8,
-  width: 802,
-  height: 1670,
-  cornerRadius: 168,
+  x: 26,
+  y: 26,
+  width: 778,
+  height: 1632,
+  cornerRadius: 100,
 };
 
 const PHONE_SCALE_RATIO = 0.55;
@@ -60,11 +60,12 @@ export function getMockupScale(): number {
   return targetHeight / DYNAMIC_ORIGINAL_HEIGHT;
 }
 
-// Dynamic layer position (outer bounds, centered)
+// Dynamic layer position (centered horizontally, pushed toward bottom)
 export function getMockupPosition(mockupSize: Size): Position {
+  const verticalSpace = CANVAS_HEIGHT - mockupSize.height;
   return {
     x: Math.round((CANVAS_WIDTH - mockupSize.width) / 2),
-    y: Math.round((CANVAS_HEIGHT - mockupSize.height) / 2),
+    y: Math.round(verticalSpace * 0.7),
   };
 }
 

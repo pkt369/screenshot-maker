@@ -33,11 +33,11 @@ describe('frame and screen geometry', () => {
     const rect = getScreenArea({ x: 100, y: 200 }, 1);
 
     expect(rect).toEqual({
-      x: 114,
-      y: 208,
-      width: 802,
-      height: 1670,
-      cornerRadius: 168,
+      x: 134,
+      y: 234,
+      width: 762,
+      height: 1618,
+      cornerRadius: 148,
     });
   });
 });
