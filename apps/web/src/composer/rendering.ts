@@ -7,9 +7,18 @@ export interface SourceRect {
   sh: number;
 }
 
-export function getCoverSourceRect(image: Size, target: Size): SourceRect {
+export interface CoverSourceRectOptions {
+  verticalAlign?: number;
+}
+
+export function getCoverSourceRect(
+  image: Size,
+  target: Size,
+  options: CoverSourceRectOptions = {}
+): SourceRect {
   const targetAspect = target.width / target.height;
   const imageAspect = image.width / image.height;
+  const verticalAlign = options.verticalAlign ?? 0.5;
 
   if (imageAspect > targetAspect) {
     const sh = image.height;
@@ -26,7 +35,7 @@ export function getCoverSourceRect(image: Size, target: Size): SourceRect {
   const sh = image.width / targetAspect;
   return {
     sx: 0,
-    sy: (image.height - sh) / 2,
+    sy: (image.height - sh) * verticalAlign,
     sw,
     sh,
   };

@@ -73,6 +73,10 @@ function renderSlide(
       {
         width: screenRect.width,
         height: screenRect.height,
+      },
+      {
+        // Preserve more of the top chrome so the status bar sits lower below the Dynamic Island.
+        verticalAlign: 0.3,
       }
     );
 

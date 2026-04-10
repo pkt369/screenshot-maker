@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 
+import { getScreenArea } from './layout';
 import { clipRoundedRect, getCoverSourceRect } from './rendering';
 
 describe('getCoverSourceRect', () => {
@@ -23,6 +24,34 @@ describe('getCoverSourceRect', () => {
       sw: 1200,
       sh: 600,
     });
+  });
+
+  it('supports top-biased vertical cropping for tall images', () => {
+    const rect = getCoverSourceRect(
+      { width: 1200, height: 2400 },
+      { width: 600, height: 300 },
+      { verticalAlign: 0.3 }
+    );
+
+    expect(rect).toEqual({
+      sx: 0,
+      sy: 540,
+      sw: 1200,
+      sh: 600,
+    });
+  });
+
+  it('keeps top crop shallow for App Store sized screenshots so the status bar sits lower', () => {
+    const screenRect = getScreenArea({ x: 0, y: 0 }, 1);
+    const rect = getCoverSourceRect(
+      { width: 1242, height: 2688 },
+      screenRect,
+      { verticalAlign: 0.3 }
+    );
+
+    expect(rect.sx).toBe(0);
+    expect(rect.sw).toBe(1242);
+    expect(rect.sy).toBeLessThan(30);
   });
 });
 

@@ -9,16 +9,17 @@ import {
 } from './layout';
 
 describe('getMockupPosition', () => {
-  it('centers the mockup with balanced left/right and top/bottom margins', () => {
+  it('centers the mockup horizontally and pushes it toward the bottom', () => {
     const mockupSize = {
       width: 728,
       height: 1478,
     };
 
     const position = getMockupPosition(mockupSize);
+    const verticalSpace = CANVAS_HEIGHT - mockupSize.height;
 
     expect(position.x).toBe(Math.round((CANVAS_WIDTH - mockupSize.width) / 2));
-    expect(position.y).toBe(Math.round((CANVAS_HEIGHT - mockupSize.height) / 2));
+    expect(position.y).toBe(Math.round(verticalSpace * 0.7));
   });
 });
 
@@ -33,11 +34,11 @@ describe('frame and screen geometry', () => {
     const rect = getScreenArea({ x: 100, y: 200 }, 1);
 
     expect(rect).toEqual({
-      x: 134,
-      y: 234,
-      width: 762,
-      height: 1618,
-      cornerRadius: 148,
+      x: 126,
+      y: 226,
+      width: 778,
+      height: 1632,
+      cornerRadius: 100,
     });
   });
 });
