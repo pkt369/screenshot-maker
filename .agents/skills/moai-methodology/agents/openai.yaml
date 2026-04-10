@@ -1,0 +1,7 @@
+interface:
+  display_name: "MoAI Methodology"
+  short_description: "Apply MoAI-style TDD or DDD delivery flow"
+  default_prompt: "Use $moai-methodology to choose the right MoAI-style workflow for this task and enforce the right checkpoints before coding."
+
+policy:
+  allow_implicit_invocation: true

@@ -1,0 +1,7 @@
+interface:
+  display_name: "MoAI Spec Workflow"
+  short_description: "Turn requests into SPEC-like execution checklists"
+  default_prompt: "Use $moai-spec-workflow to turn this request into a compact SPEC, checklist, and verification plan before implementation."
+
+policy:
+  allow_implicit_invocation: true

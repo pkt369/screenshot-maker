@@ -1,0 +1,7 @@
+interface:
+  display_name: "MoAI Quality Gates"
+  short_description: "Run MoAI-style final validation and cleanup"
+  default_prompt: "Use $moai-quality-gates to run the right MoAI-style validation and cleanup pass before closing this task."
+
+policy:
+  allow_implicit_invocation: true
