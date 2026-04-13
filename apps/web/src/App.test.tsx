@@ -4,11 +4,12 @@ import { describe, expect, it } from 'vitest';
 import App from './App';
 
 describe('App', () => {
-  it('renders the screenshot composer entry screen', () => {
+  it('renders the home page with device cards', () => {
     render(<App />);
 
-    expect(screen.getByText('Screenshot Composer')).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: /create app store screenshots instantly/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /download all/i })).toBeInTheDocument();
+    expect(screen.getByText('Screenshot Maker')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /create beautiful app screenshots/i })).toBeInTheDocument();
+    expect(screen.getByText('App Store screenshots (1242×2688)')).toBeInTheDocument();
+    expect(screen.getByText('App Store screenshots (2048×2732)')).toBeInTheDocument();
   });
 });

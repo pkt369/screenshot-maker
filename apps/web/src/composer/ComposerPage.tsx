@@ -1,20 +1,32 @@
 import { useRef, useState, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 
-import { CANVAS_WIDTH, CANVAS_HEIGHT } from './layout';
+import type { DeviceConfig } from '../devices/types';
 import { useMultiCanvasRenderer, type SlideConfig, type SharedConfig } from './useCanvasRenderer';
 
-const MIN_SLIDES = 3;
-const MAX_SLIDES = 5;
+const INITIAL_SLIDES = 3;
+const MIN_SLIDES = 1;
+const MAX_SLIDES = 6;
 
-function createEmptySlide(): SlideConfig {
-  return { screenshot: null, headline: '', headlineFontSize: 128 };
+// Design Ref: §2.2 — ComposerPage accepts deviceConfig prop for multi-device support
+interface ComposerPageProps {
+  deviceConfig: DeviceConfig;
 }
 
-export function ComposerPage() {
+function createEmptySlide(config: DeviceConfig): SlideConfig {
+  return {
+    screenshot: null,
+    headline: '',
+    headlineFontSize: config.headline.defaultFontSize,
+    headlineColor: '#ffffff',
+  };
+}
+
+export function ComposerPage({ deviceConfig }: ComposerPageProps) {
   const canvasRefs = useRef<(HTMLCanvasElement | null)[]>([]);
 
   const [slides, setSlides] = useState<SlideConfig[]>(() =>
-    Array.from({ length: MIN_SLIDES }, createEmptySlide)
+    Array.from({ length: INITIAL_SLIDES }, () => createEmptySlide(deviceConfig))
   );
   const [activeIndex, setActiveIndex] = useState(0);
   const [shared, setShared] = useState<SharedConfig>({
@@ -23,7 +35,7 @@ export function ComposerPage() {
   });
 
   const { mockupLoaded, mockupError, downloadAll, downloadOne } =
-    useMultiCanvasRenderer(canvasRefs, slides, shared);
+    useMultiCanvasRenderer(canvasRefs, slides, shared, deviceConfig);
 
   const updateSlide = useCallback((index: number, patch: Partial<SlideConfig>) => {
     setSlides((prev) => prev.map((s, i) => (i === index ? { ...s, ...patch } : s)));
@@ -31,7 +43,7 @@ export function ComposerPage() {
 
   const addSlide = () => {
     if (slides.length >= MAX_SLIDES) return;
-    setSlides((prev) => [...prev, createEmptySlide()]);
+    setSlides((prev) => [...prev, createEmptySlide(deviceConfig)]);
     setActiveIndex(slides.length);
   };
 
@@ -57,13 +69,18 @@ export function ComposerPage() {
     canvasRefs.current[index] = el;
   };
 
+  const { width: cw, height: ch } = deviceConfig.canvas;
+
   return (
     <main className="composer-shell">
+      <nav className="back-nav">
+        <Link to="/" className="back-link">← Back</Link>
+      </nav>
       <section className="hero">
         <p className="eyebrow">Screenshot Composer</p>
         <h1>Create App Store screenshots instantly.</h1>
         <p className="hero-copy">
-          Upload your app screens, add headlines, and download store-ready 1242x2688 mockups.
+          Upload your app screens, add headlines, and download store-ready {cw}×{ch} mockups.
         </p>
       </section>
 
@@ -124,12 +141,13 @@ export function ComposerPage() {
                       <button
                         className="slide-remove"
                         type="button"
+                        aria-label={`Delete slide ${i + 1}`}
                         onClick={(e) => {
                           e.stopPropagation();
                           removeSlide(i);
                         }}
                       >
-                        Remove
+                        Delete
                       </button>
                     )}
                   </div>
@@ -153,6 +171,15 @@ export function ComposerPage() {
                         type="number"
                         value={slide.headlineFontSize}
                         onChange={(e) => updateSlide(i, { headlineFontSize: Number(e.target.value) })}
+                      />
+                    </label>
+                    <label className="field" onClick={(e) => e.stopPropagation()}>
+                      <span>Font Color</span>
+                      <input
+                        type="color"
+                        aria-label={`Headline color for slide ${i + 1}`}
+                        value={slide.headlineColor}
+                        onChange={(e) => updateSlide(i, { headlineColor: e.target.value })}
                       />
                     </label>
                   </div>
@@ -186,7 +213,7 @@ export function ComposerPage() {
         </section>
 
         <section className="composer-preview">
-          <div className="preview-grid">
+          <div className={`preview-grid${slides.length === 1 ? ' preview-grid-single' : ''}`}>
             {slides.map((_, i) => (
               <div
                 key={i}
@@ -196,7 +223,7 @@ export function ComposerPage() {
                 <canvas
                   ref={(el) => setCanvasRef(i, el)}
                   style={{
-                    aspectRatio: `${CANVAS_WIDTH} / ${CANVAS_HEIGHT}`,
+                    aspectRatio: `${cw} / ${ch}`,
                   }}
                 />
                 <span className="preview-label">

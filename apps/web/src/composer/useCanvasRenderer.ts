@@ -1,8 +1,7 @@
 import { useEffect, useRef, useState, type RefObject } from 'react';
 
+import type { DeviceConfig } from '../devices/types';
 import {
-  CANVAS_WIDTH,
-  CANVAS_HEIGHT,
   getScaledMockup,
   getScaledFrame,
   getMockupScale,
@@ -17,6 +16,7 @@ export interface SlideConfig {
   screenshot: HTMLImageElement | null;
   headline: string;
   headlineFontSize: number;
+  headlineColor: string;
 }
 
 export interface SharedConfig {
@@ -33,39 +33,40 @@ function loadImage(src: string): Promise<HTMLImageElement> {
   });
 }
 
-// Design Ref: §4.3 — 3-Layer compositing (frame → screenshot → dynamic)
-function renderSlide(
+// Design Ref: §5.2 — config-based rendering, dynamic overlay optional
+export function renderSlide(
   canvas: HTMLCanvasElement,
   frameImg: HTMLImageElement,
-  dynamicImg: HTMLImageElement,
+  dynamicImg: HTMLImageElement | null,
   slide: SlideConfig,
-  shared: SharedConfig
+  shared: SharedConfig,
+  config: DeviceConfig
 ) {
   const ctx = canvas.getContext('2d');
   if (!ctx) return;
 
-  canvas.width = CANVAS_WIDTH;
-  canvas.height = CANVAS_HEIGHT;
+  canvas.width = config.canvas.width;
+  canvas.height = config.canvas.height;
 
-  const gradient = ctx.createLinearGradient(0, 0, 0, CANVAS_HEIGHT);
+  const gradient = ctx.createLinearGradient(0, 0, 0, config.canvas.height);
   gradient.addColorStop(0, shared.backgroundTop);
   gradient.addColorStop(1, shared.backgroundBottom);
   ctx.fillStyle = gradient;
-  ctx.fillRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+  ctx.fillRect(0, 0, config.canvas.width, config.canvas.height);
 
-  const mockupSize = getScaledMockup();
-  const mockupPos = getMockupPosition(mockupSize);
-  const scale = getMockupScale();
-  const frameSize = getScaledFrame(scale);
+  const mockupSize = getScaledMockup(config);
+  const mockupPos = getMockupPosition(config, mockupSize);
+  const scale = getMockupScale(config);
+  const frameSize = getScaledFrame(config, scale);
   const framePos = getFramePosition(mockupPos);
 
-  // Layer 1 (bottom): Phone frame body
+  // Layer 1 (bottom): Device frame body
   ctx.drawImage(frameImg, framePos.x, framePos.y, frameSize.width, frameSize.height);
 
-  // Layer 2 (middle): User screenshot in screen area — Cover fit (crop to fill)
-  // Plan SC: SC-01~SC-03 — aspect ratio preserved, screen area fully covered
+  // Layer 2 (middle): User screenshot in screen area
+  // Plan SC: SC-02 — screenshot renders inside iPad/iPhone frame
   if (slide.screenshot) {
-    const screenRect = getScreenArea(framePos, scale);
+    const screenRect = getScreenArea(config, framePos, scale);
     const { sx, sy, sw, sh } = getCoverSourceRect(
       {
         width: slide.screenshot.naturalWidth,
@@ -76,12 +77,10 @@ function renderSlide(
         height: screenRect.height,
       },
       {
-        // Preserve more of the top chrome so the status bar sits lower below the Dynamic Island.
-        verticalAlign: 0.3,
+        verticalAlign: config.mockup.verticalAlign ?? 0.5,
       }
     );
 
-    // Clip to the rounded display area so screenshot corners never bleed past the frame.
     ctx.save();
     clipRoundedRect(ctx, screenRect);
     ctx.drawImage(
@@ -92,13 +91,15 @@ function renderSlide(
     ctx.restore();
   }
 
-  // Layer 3 (top): Dynamic Island + side buttons overlay
-  ctx.drawImage(dynamicImg, mockupPos.x, mockupPos.y, mockupSize.width, mockupSize.height);
+  // Layer 3 (top): Dynamic overlay (iPhone only, iPad skips)
+  if (dynamicImg) {
+    ctx.drawImage(dynamicImg, mockupPos.x, mockupPos.y, mockupSize.width, mockupSize.height);
+  }
 
-  // Draw headline above the phone
+  // Draw headline above the device
   if (slide.headline) {
     const headlineY = getHeadlineY(mockupPos.y);
-    ctx.fillStyle = '#ffffff';
+    ctx.fillStyle = slide.headlineColor;
     const fontSize = slide.headlineFontSize;
     ctx.font = `bold ${fontSize}px system-ui, -apple-system, sans-serif`;
     ctx.textAlign = 'center';
@@ -110,49 +111,56 @@ function renderSlide(
     const startY = headlineY - totalHeight / 2;
 
     lines.forEach((line, i) => {
-      ctx.fillText(line, CANVAS_WIDTH / 2, startY + i * lineHeight);
+      ctx.fillText(line, config.canvas.width / 2, startY + i * lineHeight);
     });
   }
 }
 
+// Design Ref: §5.1 — config-based hook with optional dynamic image loading
 export function useMultiCanvasRenderer(
   canvasRefs: RefObject<(HTMLCanvasElement | null)[]>,
   slides: SlideConfig[],
-  shared: SharedConfig
+  shared: SharedConfig,
+  config: DeviceConfig
 ) {
   const frameImgRef = useRef<HTMLImageElement | null>(null);
   const dynamicImgRef = useRef<HTMLImageElement | null>(null);
   const [mockupLoaded, setMockupLoaded] = useState(false);
   const [mockupError, setMockupError] = useState<string | null>(null);
 
-  // Load frame + dynamic layers in parallel
+  // Load frame + dynamic layers (dynamic is optional for iPad)
   useEffect(() => {
-    Promise.all([
-      loadImage('/mockups/iPhone16-frame.png'),
-      loadImage('/mockups/iPhone16-dynamic.png'),
-    ])
+    setMockupLoaded(false);
+    setMockupError(null);
+
+    const promises: Promise<HTMLImageElement>[] = [loadImage(config.mockup.frameImage)];
+    if (config.mockup.dynamicImage) {
+      promises.push(loadImage(config.mockup.dynamicImage));
+    }
+
+    Promise.all(promises)
       .then(([frame, dynamic]) => {
         frameImgRef.current = frame;
-        dynamicImgRef.current = dynamic;
+        dynamicImgRef.current = dynamic ?? null;
         setMockupLoaded(true);
       })
       .catch((err) => {
         setMockupError(err.message);
       });
-  }, []);
+  }, [config]);
 
   useEffect(() => {
     const canvases = canvasRefs.current;
     const frameImg = frameImgRef.current;
     const dynamicImg = dynamicImgRef.current;
-    if (!canvases || !mockupLoaded || !frameImg || !dynamicImg) return;
+    if (!canvases || !mockupLoaded || !frameImg) return;
 
     slides.forEach((slide, i) => {
       const canvas = canvases[i];
       if (!canvas) return;
-      renderSlide(canvas, frameImg, dynamicImg, slide, shared);
+      renderSlide(canvas, frameImg, dynamicImg, slide, shared, config);
     });
-  }, [canvasRefs, slides, shared, mockupLoaded]);
+  }, [canvasRefs, slides, shared, mockupLoaded, config]);
 
   const downloadAll = () => {
     const canvases = canvasRefs.current;

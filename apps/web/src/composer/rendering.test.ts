@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 
+import { IPHONE_CONFIG } from '../devices/iphone';
 import { getScreenArea } from './layout';
 import { clipRoundedRect, getCoverSourceRect } from './rendering';
 
@@ -42,7 +43,7 @@ describe('getCoverSourceRect', () => {
   });
 
   it('keeps top crop shallow for App Store sized screenshots so the status bar sits lower', () => {
-    const screenRect = getScreenArea({ x: 0, y: 0 }, 1);
+    const screenRect = getScreenArea(IPHONE_CONFIG, { x: 0, y: 0 }, 1);
     const rect = getCoverSourceRect(
       { width: 1242, height: 2688 },
       screenRect,

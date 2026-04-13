@@ -1,8 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
+import { IPHONE_CONFIG } from '../devices/iphone';
 import {
-  CANVAS_HEIGHT,
-  CANVAS_WIDTH,
   getFramePosition,
   getMockupPosition,
   getScreenArea,
@@ -15,23 +14,23 @@ describe('getMockupPosition', () => {
       height: 1478,
     };
 
-    const position = getMockupPosition(mockupSize);
-    const verticalSpace = CANVAS_HEIGHT - mockupSize.height;
+    const position = getMockupPosition(IPHONE_CONFIG, mockupSize);
+    const verticalSpace = IPHONE_CONFIG.canvas.height - mockupSize.height;
 
-    expect(position.x).toBe(Math.round((CANVAS_WIDTH - mockupSize.width) / 2));
+    expect(position.x).toBe(Math.round((IPHONE_CONFIG.canvas.width - mockupSize.width) / 2));
     expect(position.y).toBe(Math.round(verticalSpace * 0.7));
   });
 });
 
 describe('frame and screen geometry', () => {
   it('uses the same origin for frame and dynamic layers', () => {
-    const position = getFramePosition({ x: 120, y: 240 }, 1);
+    const position = getFramePosition({ x: 120, y: 240 });
 
     expect(position).toEqual({ x: 120, y: 240 });
   });
 
   it('maps the display opening close to the visible frame edges', () => {
-    const rect = getScreenArea({ x: 100, y: 200 }, 1);
+    const rect = getScreenArea(IPHONE_CONFIG, { x: 100, y: 200 }, 1);
 
     expect(rect).toEqual({
       x: 126,
