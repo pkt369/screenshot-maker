@@ -1,4 +1,4 @@
-// Design Ref: §2.2 — iPad card activated with Link to /ipad
+// Design Ref: §2.2 — iPad/Galaxy cards activated with Link routes
 import { Link } from 'react-router-dom';
 
 export function HomePage() {
@@ -13,7 +13,7 @@ export function HomePage() {
       </section>
 
       <div className="home-content">
-        {/* Plan SC: SC-01 — Apple/Android 섹션, iPad 카드 활성화 */}
+        {/* Plan SC: SC-01 — Apple/Android 섹션, iPad/Galaxy 카드 활성화 */}
         <section className="device-section">
           <h2 className="section-heading">Apple</h2>
           <div className="device-grid">
@@ -37,11 +37,13 @@ export function HomePage() {
         <section className="device-section">
           <h2 className="section-heading">Android</h2>
           <div className="device-grid">
-            <div className="device-card disabled">
+            <Link to="/galaxy" className="device-card">
               <span className="device-icon">Galaxy</span>
               <span className="device-name">Galaxy</span>
-              <span className="coming-soon-badge">Coming Soon</span>
-            </div>
+              <span className="device-desc">
+                Play Store screenshots (1080×1920)
+              </span>
+            </Link>
             <div className="device-card disabled">
               <span className="device-icon">Design</span>
               <span className="device-name">Graphic Design</span>

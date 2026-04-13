@@ -158,11 +158,11 @@ export function ComposerPage({ deviceConfig }: ComposerPageProps) {
                     </label>
                     <label className="field" onClick={(e) => e.stopPropagation()}>
                       <span>Headline</span>
-                      <input
-                        type="text"
+                      <textarea
+                        rows={3}
                         value={slide.headline}
                         onChange={(e) => updateSlide(i, { headline: e.target.value })}
-                        placeholder="Enter headline text"
+                        placeholder="Enter headline text (press Enter for a new line)"
                       />
                     </label>
                     <label className="field" onClick={(e) => e.stopPropagation()}>
