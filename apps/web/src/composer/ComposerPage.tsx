@@ -1,5 +1,4 @@
 import { useRef, useState, useCallback } from 'react';
-import { Link } from 'react-router-dom';
 
 import type { DeviceConfig } from '../devices/types';
 import { useMultiCanvasRenderer, type SlideConfig, type SharedConfig } from './useCanvasRenderer';
@@ -73,16 +72,7 @@ export function ComposerPage({ deviceConfig }: ComposerPageProps) {
 
   return (
     <main className="composer-shell">
-      <nav className="back-nav">
-        <Link to="/" className="back-link">← Back</Link>
-      </nav>
-      <section className="hero">
-        <p className="eyebrow">Screenshot Composer</p>
-        <h1>Create App Store screenshots instantly.</h1>
-        <p className="hero-copy">
-          Upload your app screens, add headlines, and download store-ready {cw}×{ch} mockups.
-        </p>
-      </section>
+      <div className="composer-dimensions">{cw}×{ch}</div>
 
       <div className="composer-layout">
         <section className="composer-panel">

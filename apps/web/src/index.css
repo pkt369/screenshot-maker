@@ -1,5 +1,6 @@
 :root {
-  font-family: "Geist", system-ui, -apple-system, sans-serif;
+  --ds-focus-color: hsla(212, 100%, 48%, 1);
+  font-family: "Geist", Arial, "Apple Color Emoji", "Segoe UI Emoji", sans-serif;
   font-feature-settings: "liga";
   color: #171717;
   background: #ffffff;
@@ -20,6 +21,29 @@ body {
 }
 
 button,
-input {
+input,
+textarea {
   font: inherit;
+  font-feature-settings: "liga";
+}
+
+::selection {
+  background: hsla(0, 0%, 95%, 1);
+  color: #171717;
+}
+
+:focus-visible {
+  outline: 2px solid var(--ds-focus-color);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+code,
+kbd,
+samp,
+pre {
+  font-family: "Geist Mono", ui-monospace, SFMono-Regular, "Roboto Mono",
+    Menlo, Monaco, "Liberation Mono", "DejaVu Sans Mono", "Courier New",
+    monospace;
+  font-feature-settings: "liga", "tnum";
 }
